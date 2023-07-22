@@ -52,14 +52,16 @@ const createLink = (sourceId, targetId, path) => {
     const sourceFamily = findGrandparentElementById(sourceId)
     const targetFamily = findGrandparentElementById(targetId)
 
-    const targetLink = nodeEditor.checkTargetLink(targetId)
-    const sourceLink = nodeEditor.checkSourceLink(targetId)
-    console.log(sourceLink, targetLink)
-    if (targetLink) {
-        nodeEditor.removeConnectedTargetControllPoint(targetLink, pathWraper.value)
-    }
-    if (sourceLink) {
-        nodeEditor.removeConnectedTargetControllPoint(sourceLink, pathWraper.value)
+    if (document.getElementById(targetId).className === "controll-point in") {
+        const sourceLinkLimitSelf = nodeEditor.checkSourceLink(targetId)
+        if (sourceLinkLimitSelf) {
+            nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitSelf, pathWraper.value)
+        }
+
+        const sourceLinkLimitTarget = nodeEditor.checkTargetLink(targetId)
+        if (sourceLinkLimitTarget) {
+            nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitTarget, pathWraper.value)
+        }
     }
     if (document.getElementById(sourceId).className === "controll-point in") {
         const sourceLinkLimitSelf = nodeEditor.checkSourceLink(sourceId)
