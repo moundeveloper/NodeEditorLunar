@@ -15,8 +15,10 @@ import Node from './Node.vue'
 import { getElementPositionOffset, setPathDByID, findGrandparentElementById, getElementPositionViewportById } from "../utils/htmlElement.js"
 import { genId } from "../utils/utility.js"
 import { nodeEditor } from "../stores/nodeEditor.js"
-import { NodeC } from "../classes/Node"
+import { NodeC, NodeVariableC } from "../classes/Node"
 import { LinkC } from "../classes/Link"
+import { ControllPointC } from "../classes/ControllPoint"
+import { TypesEnum } from "../classes/Types.js";
 
 const pathWraper = ref('')
 let isUpdateRunning = false;
@@ -26,30 +28,15 @@ let isMouseDown = false;
 let path, startPos, startBoxId
 let startingPosition = { x: 0, y: 0 }
 
-nodeEditor.addNode(new NodeC(genId(), "multiply", 2, [
-    { id: genId("in"), type: "string", to: "" },
-], [
-    { id: genId("out"), type: "integer", to: "" },
-    { id: genId("out"), type: "float", to: "" },
-]))
-nodeEditor.addNode(new NodeC(genId(), "add", 2, [
-    { id: genId("in"), type: "string", to: "" },
-], [
-    { id: genId("out"), type: "integer", to: "" },
-    { id: genId("out"), type: "float", to: "" },
-]))
-nodeEditor.addNode(new NodeC(genId(), "add", 2, [
-    { id: genId("in"), type: "string", to: "" },
-], [
-    { id: genId("out"), type: "integer", to: "" },
-    { id: genId("out"), type: "float", to: "" },
-]))
+nodeEditor.addNode(new NodeVariableC("billy"))
+nodeEditor.addNode(new NodeVariableC("frank"))
+nodeEditor.addNode(new NodeVariableC("joel"))
 
 const createLink = (sourceId, targetId, path) => {
 
     // Check if link already exists
-    const existingLink = nodeEditor.links.find(link => link.id === sourceId && link.id === targetId);
-    if (existingLink) return
+    /*     const existingLink = nodeEditor.links.find(link => link.id === sourceId && link.id === targetId);
+        if (existingLink) return */
 
     const sourceFamily = findGrandparentElementById(sourceId)
     const targetFamily = findGrandparentElementById(targetId)
@@ -67,36 +54,28 @@ const createLink = (sourceId, targetId, path) => {
             clearSVGPath(pathToRemove)
         }
     }
-    /*     if (document.getElementById(sourceId).className === "controll-point in") {
-            const sourceLinkLimitSelf = nodeEditor.checkSourceLink(sourceId)
-            if (sourceLinkLimitSelf) {
-                console.log("self: " + sourceLinkLimitSelf)
-                const removedPath = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitSelf, pathWraper.value)
-                console.log(removedPath)
-            }
-    
-            const sourceLinkLimitTarget = nodeEditor.checkTargetLink(sourceId)
-            if (sourceLinkLimitTarget) {
-                console.log("target: " + sourceLinkLimitTarget)
-                const removedPath = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitTarget, pathWraper.value)
-                console.log(removedPath)
-            }
-        } */
 
-    nodeEditor.updateNodeControllPoint(sourceFamily.grandparent.id, sourceId, (controllPoint) => {
+    let sourceControllPoint = null
+    let targetControllPoint = null
+    let sourceNode = null
+    let targetNode = null
+    nodeEditor.updateNodeControllPoint(sourceFamily.grandparent.id, sourceId, (controllPoint, node) => {
+        sourceNode = node
+        sourceControllPoint = controllPoint
         controllPoint.to = targetId
     })
-    nodeEditor.updateNodeControllPoint(targetFamily.grandparent.id, targetId, (controllPoint) => {
+    nodeEditor.updateNodeControllPoint(targetFamily.grandparent.id, targetId, (controllPoint, node) => {
+        targetNode = node
+        targetControllPoint = controllPoint
         controllPoint.to = sourceId
     })
-
     const startPos = getElementPositionOffset(sourceId)
     const endPos = getElementPositionOffset(targetId)
+    console.log(sourceControllPoint, targetControllPoint)
+    const { d } = generateDpath(startPos, endPos)
+    const link = new LinkC(genId(), sourceControllPoint, targetControllPoint, sourceNode, targetNode)
 
-    const { d, controllPoints } = generateDpath(startPos, endPos)
-    const link = new LinkC(genId(), sourceId, targetId, controllPoints)
-    console.log(path)
-
+    console.log(link)
     path.setAttribute("id", link.id)
     path.setAttribute("d", d)
 
@@ -113,8 +92,8 @@ const createNode = () => {
 }
 
 const updateLink = (link) => {
-    const sourcePos = getElementPositionOffset(link.sourceNode)
-    const targetPos = getElementPositionOffset(link.targetNode)
+    const sourcePos = getElementPositionOffset(link.sourceControllPoint.id)
+    const targetPos = getElementPositionOffset(link.targetControllPoint.id)
     const { d } = generateDpath(sourcePos, targetPos)
     setPathDByID(link.id, d)
 }
@@ -222,7 +201,7 @@ onMounted(() => {
             const sourceLinkLimitSelf = nodeEditor.checkSourceLink(startBoxId)
             if (sourceLinkLimitSelf) {
                 const removedPath = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitSelf)
-                startBoxId = sourceLinkLimitSelf.targetNode
+                startBoxId = sourceLinkLimitSelf.targetControllPoint.id
                 const { x, y } = getElementPositionOffset(startBoxId)
                 const { xV, yV } = getElementPositionViewportById(startBoxId)
                 startingPosition.x = xV / nodeEditor.scale - x;
@@ -234,7 +213,7 @@ onMounted(() => {
             const sourceLinkLimitTarget = nodeEditor.checkTargetLink(startBoxId)
             if (sourceLinkLimitTarget) {
                 const removedPath = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitTarget)
-                startBoxId = sourceLinkLimitTarget.sourceNode
+                startBoxId = sourceLinkLimitTarget.sourceControllPoint.id
                 const { x, y } = getElementPositionOffset(startBoxId)
                 const { xV, yV } = getElementPositionViewportById(startBoxId)
                 startingPosition.x = xV / nodeEditor.scale - x;

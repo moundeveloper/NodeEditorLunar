@@ -12,10 +12,10 @@ export const nodeEditor = reactive({
     this.links.push(link);
   },
   checkSourceLink(cpId) {
-    return this.links.find((link) => link.sourceNode === cpId);
+    return this.links.find((link) => link.sourceControllPoint.id === cpId);
   },
   checkTargetLink(cpId) {
-    return this.links.find((link) => link.targetNode === cpId);
+    return this.links.find((link) => link.targetControllPoint.id === cpId);
   },
   removeConnectedTargetControllPoint(removeLink) {
     const path = document.getElementById(removeLink.id);
@@ -48,7 +48,7 @@ export const nodeEditor = reactive({
       return;
     }
     // Call the callback with the controll-point
-    callback(controllPoint);
+    callback(controllPoint, node);
   },
 });
 

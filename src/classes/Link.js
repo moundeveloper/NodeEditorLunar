@@ -1,14 +1,15 @@
-import { genId } from "../utils/utility";
-
 export class LinkC {
-  constructor(id, sourceNode, targetNode, controllPoints) {
+  constructor(
+    id,
+    sourceControllPoint,
+    targetControllPoint,
+    sourceNode,
+    targetNode
+  ) {
     this.id = id;
+    this.sourceControllPoint = sourceControllPoint;
+    this.targetControllPoint = targetControllPoint;
     this.sourceNode = sourceNode;
     this.targetNode = targetNode;
-    this.controllPoints = controllPoints;
-  }
-
-  processNodeValue() {
-    this.targetNode.value = this.sourceNode.runProcess();
   }
 }
