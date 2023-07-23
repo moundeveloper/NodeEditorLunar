@@ -5,6 +5,11 @@ export const getElementPosition = (element) => {
   const rect = element.getBoundingClientRect();
   return { x: rect.left, y: rect.top };
 };
+export const getElementPositionViewportById = (id) => {
+  const element = document.getElementById(id);
+  const rect = element.getBoundingClientRect();
+  return { xV: rect.left + rect.width / 2, yV: rect.top + rect.height / 2 };
+};
 
 export const getElementPositionCentered = (element) => {
   const rect = element.getBoundingClientRect();

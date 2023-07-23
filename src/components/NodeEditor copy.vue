@@ -12,13 +12,15 @@
 <script setup>
 import { ref, reactive, watch, onMounted, onUnmounted } from 'vue';
 import Node from './Node.vue'
-import { getElementPositionOffset, setPathDByID, findGrandparentElementById, getElementPositionViewportById } from "../utils/htmlElement.js"
+import { getElementPositionOffset, setPathDByID, findGrandparentElementById } from "../utils/htmlElement.js"
 import { genId } from "../utils/utility.js"
 import { nodeEditor } from "../stores/nodeEditor.js"
 import { NodeC } from "../classes/Node"
 import { LinkC } from "../classes/Link"
 
 const pathWraper = ref('')
+const selectedNodes = ref([])
+/* const nodeEditor = reactive({ links: [] }) */
 let isUpdateRunning = false;
 let globalID
 // Drag and drop link connection variables
@@ -57,31 +59,29 @@ const createLink = (sourceId, targetId, path) => {
     if (document.getElementById(targetId).className === "controll-point in") {
         const sourceLinkLimitSelf = nodeEditor.checkSourceLink(targetId)
         if (sourceLinkLimitSelf) {
-            const pathToRemove = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitSelf)
-            clearSVGPath(pathToRemove)
+            nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitSelf, pathWraper.value)
         }
 
         const sourceLinkLimitTarget = nodeEditor.checkTargetLink(targetId)
         if (sourceLinkLimitTarget) {
-            const pathToRemove = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitTarget)
-            clearSVGPath(pathToRemove)
+            nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitTarget, pathWraper.value)
         }
     }
-    /*     if (document.getElementById(sourceId).className === "controll-point in") {
-            const sourceLinkLimitSelf = nodeEditor.checkSourceLink(sourceId)
-            if (sourceLinkLimitSelf) {
-                console.log("self: " + sourceLinkLimitSelf)
-                const removedPath = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitSelf, pathWraper.value)
-                console.log(removedPath)
-            }
-    
-            const sourceLinkLimitTarget = nodeEditor.checkTargetLink(sourceId)
-            if (sourceLinkLimitTarget) {
-                console.log("target: " + sourceLinkLimitTarget)
-                const removedPath = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitTarget, pathWraper.value)
-                console.log(removedPath)
-            }
-        } */
+    if (document.getElementById(sourceId).className === "controll-point in") {
+        const sourceLinkLimitSelf = nodeEditor.checkSourceLink(sourceId)
+        if (sourceLinkLimitSelf) {
+            console.log("self: " + sourceLinkLimitSelf)
+            const removedPath = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitSelf, pathWraper.value)
+            console.log(removedPath)
+        }
+
+        const sourceLinkLimitTarget = nodeEditor.checkTargetLink(sourceId)
+        if (sourceLinkLimitTarget) {
+            console.log("target: " + sourceLinkLimitTarget)
+            const removedPath = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitTarget, pathWraper.value)
+            console.log(removedPath)
+        }
+    }
 
     nodeEditor.updateNodeControllPoint(sourceFamily.grandparent.id, sourceId, (controllPoint) => {
         controllPoint.to = targetId
@@ -191,17 +191,12 @@ function createSVGPath(startX, startY) {
     startPos = { x: startX, y: startY };
 }
 
-function createSVGPathRemoved(startX, startY, removedPath) {
-    path = removedPath
-    startPos = { x: startX, y: startY };
-}
-
 function updateSVGPath(x, y) {
     const { d } = generateDpath({ x: startPos.x, y: startPos.y }, { x, y })
     path.setAttribute("d", d);
 }
 
-function clearSVGPath(path) {
+function clearSVGPath() {
     if (path) {
         pathWraper.value.removeChild(path);
         path = null;
@@ -217,33 +212,6 @@ onMounted(() => {
         isMouseDown = true;
         const { x, y } = getElementPositionOffset(event.target.id)
         startBoxId = event.target.id;
-
-        if (document.getElementById(startBoxId).className === "controll-point in") {
-            const sourceLinkLimitSelf = nodeEditor.checkSourceLink(startBoxId)
-            if (sourceLinkLimitSelf) {
-                const removedPath = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitSelf)
-                startBoxId = sourceLinkLimitSelf.targetNode
-                const { x, y } = getElementPositionOffset(startBoxId)
-                const { xV, yV } = getElementPositionViewportById(startBoxId)
-                startingPosition.x = xV / nodeEditor.scale - x;
-                startingPosition.y = yV / nodeEditor.scale - y;
-                createSVGPathRemoved(x, y, removedPath)
-                return
-            }
-
-            const sourceLinkLimitTarget = nodeEditor.checkTargetLink(startBoxId)
-            if (sourceLinkLimitTarget) {
-                const removedPath = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitTarget)
-                startBoxId = sourceLinkLimitTarget.sourceNode
-                const { x, y } = getElementPositionOffset(startBoxId)
-                const { xV, yV } = getElementPositionViewportById(startBoxId)
-                startingPosition.x = xV / nodeEditor.scale - x;
-                startingPosition.y = yV / nodeEditor.scale - y;
-                createSVGPathRemoved(x, y, removedPath)
-                return
-            }
-        }
-
         startingPosition.x = event.clientX / nodeEditor.scale - x;
         startingPosition.y = event.clientY / nodeEditor.scale - y;
 
@@ -266,21 +234,12 @@ onMounted(() => {
                 event.clientX,
                 event.clientY
             );
-
-            if (typeof targetElement.className !== 'string' || !targetElement.className.includes("controll-point")) {
-                clearSVGPath(path);
-                isMouseDown = false;
-                return
-            }
-
             if (document.getElementById(startBoxId).className === targetElement.className) {
-                clearSVGPath(path);
+                clearSVGPath();
                 isMouseDown = false;
                 return
             }
-
             const targetBoxId = targetElement?.id;
-
             if (targetBoxId && targetBoxId !== startBoxId) {
                 // Anchor the SVG path
                 const newLink = createLink(startBoxId, targetBoxId, path)
@@ -288,7 +247,7 @@ onMounted(() => {
                 console.log("Anchored to box:", targetBoxId);
             } else {
                 // Destroy the SVG path
-                clearSVGPath(path);
+                clearSVGPath();
             }
         }
         isMouseDown = false;

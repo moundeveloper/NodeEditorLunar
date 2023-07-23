@@ -17,11 +17,11 @@ export const nodeEditor = reactive({
   checkTargetLink(cpId) {
     return this.links.find((link) => link.targetNode === cpId);
   },
-  removeConnectedTargetControllPoint(removeLink, pathWraper) {
+  removeConnectedTargetControllPoint(removeLink) {
     const path = document.getElementById(removeLink.id);
-    pathWraper.removeChild(path);
     this.links = this.links.filter((link) => link.id !== removeLink.id);
     console.log("Link deleted successfully!");
+    return path;
   },
   updateScale(scale) {
     this.scale = scale;
