@@ -4,7 +4,7 @@ import { TypesEnum } from "./Types.js";
 
 export class NodeC {
   nodeType;
-  constructor(name, inputs, outputs, fields = []) {
+  constructor(name, inputs = [], outputs = [], fields = []) {
     this.id = genId();
     this.name = name;
     this.inputs = inputs;
@@ -17,10 +17,16 @@ export class NodeVariableC extends NodeC {
   constructor(name) {
     super(
       name,
-      [new ControllPointC(genId("in"), TypesEnum.Number, 4)],
-      [new ControllPointC(genId("out"), TypesEnum.Number, 4)]
+      [new ControllPointC(genId("in"))],
+      [new ControllPointC(genId("out"), TypesEnum.Number)]
     );
     super.nodeType = "variable";
+    this.variableType = TypesEnum.Number;
+    this.nodeValue = {
+      originalName: this.name,
+      currentVariableValue: 4,
+      variableValue: 4,
+    };
   }
   getInputControllPointId() {
     const [input] = this.inputs;
@@ -31,30 +37,26 @@ export class NodeVariableC extends NodeC {
     return output.id;
   }
   getVariableType() {
-    const [output] = this.outputs;
-    return output.type;
+    return this.variableType;
   }
-  getVariableValue() {
+  getData() {
     // Update return value & and return updated value
-    const [input] = this.inputs;
-    const [output] = this.outputs;
-    output.value = input.value;
-    return output.value;
+    return { name: this.name, value: this.nodeValue };
   }
-  setVariableType(newType) {
-    const [output] = this.outputs;
-    output.type = newType;
-    return output.type;
+}
+
+export class NodePrintC extends NodeC {
+  constructor() {
+    super("print", [new ControllPointC(genId("in"))]);
+    super.nodeType = "print";
+    this.nodeValue = null;
   }
-  updateInputValue(newValue) {
-    if (typeof newValue !== this.getVariableType()) {
-      console.log(
-        "The provided value does not match the type of the variable."
-      );
-      return;
-    }
+  getInputControllPointId() {
     const [input] = this.inputs;
-    input.value = newValue;
-    return input.value;
+    return input.id;
+  }
+  getData() {
+    // Update return value & and return updated value
+    return { name: this.name, value: this.nodeValue };
   }
 }
