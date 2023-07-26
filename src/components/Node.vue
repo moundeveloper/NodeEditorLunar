@@ -2,21 +2,17 @@
     <div :id="id" :style="`left:${position.x}px; top: ${position.y}px;`" ref="node" class="node-wraper"
         @mousedown="startDrag">
         <div class="node-header" ref="header">
+            <img src="../assets/icons/variable-icon.svg" alt="">
             <span>{{ name }} {{ position.x }}, {{ position.y }}</span>
-        </div>
-
-        <div v-for="input in inputs" class="node-field left-field">
-            <div :id="input.id" class="controll-point in"></div>
-            <div class="field ">
-                <span>{{ input.type }}</span>
-            </div>
+            <img src="../assets/icons/edit-icon.svg" alt="">
         </div>
 
         <div v-for="output in outputs" class="node-field right-field">
-            <div :id="output.id" class="controll-point out"></div>
             <div class="field">
-                <span>{{ output.type }}</span>
+                <DropDown />
+                <!--  <span>{{ output.type }}</span> -->
             </div>
+            <div :id="output.id" class="controll-point out"></div>
         </div>
 
         <!--         <div class="node-field">
@@ -25,12 +21,25 @@
             </div>
         </div>
  -->
+
+
+        <div v-for="input in inputs" class="node-field left-field">
+            <div :id="input.id" class="controll-point in"></div>
+            <div class="field ">
+                <span>{{ input.type }}</span>
+            </div>
+        </div>
+
+
+
+
     </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue';
 import { nodeEditor } from "../stores/nodeEditor.js"
+import DropDown from './fields/DropDown.vue';
 
 /* const { x, y } = useMouse() */
 const node = ref(null)
@@ -54,6 +63,19 @@ const props = defineProps({
     }
 })
 
+const nodeTypes = [
+    {
+        type: "variable",
+        color: "#7FBB43",
+        icon: "@/assets/icons/variable-icon.svg",
+    },
+    {
+        type: "print",
+        color: "#5458AD",
+        icon: "@/assets/icons/print-icon.svg",
+    },
+]
+
 // Handle dragging responsiveness
 const dragStore = reactive({
     isDragging: false,
@@ -74,7 +96,7 @@ function startDrag(event) {
     if (event.button === 1) return;
 
     // Update the flag and record the initial mouse positions
-    const allowedClassNames = ["node-wraper", "node-header"]
+    const allowedClassNames = ["node-wraper", "node-header", "field"]
 
     if (!allowedClassNames.includes(event.target.className)) return
     startPosition.value.x = event.clientX / nodeEditor.scale - currentPosition.value.x;
@@ -99,22 +121,6 @@ function endDrag() {
     document.body.classList.remove('move-cursor');
 }
 
-/* watch(
-    () => nodeEditor.scale,
-    (newValue, oldValue) => {
-        // Check if the function is not already running and scale has changed
-        if (!isUpdateRunning && newValue !== oldValue) {
-            // Set the flag to true, so the function runs only once
-            isUpdateRunning = !isUpdateRunning;
-            // Request the first animation frame to start the update loop
-            position.value.x = position.value.x / nodeEditor.scale;
-            position.value.y = position.value.y / nodeEditor.scale;
-        }
-    },
-    { immediate: false } // Run the callback immediately on mount
-); */
-
-
 </script>
 
 <style>
@@ -128,10 +134,10 @@ function endDrag() {
     position: absolute;
     left: 0;
     top: 0;
-    width: 14rem;
+    width: 18rem;
     aspect-ratio: 3/2;
-    background-color: rgb(48, 48, 48);
-    border-radius: 0.25rem;
+    background-color: #232323;
+    border-radius: 0.1rem;
     font-family: Arial, Helvetica, sans-serif;
     color: white;
     display: grid;
@@ -139,49 +145,64 @@ function endDrag() {
     grid-auto-flow: row;
     gap: 1rem 0;
     padding-bottom: 1rem;
+    box-shadow: 0px 0px 100px rgba(0, 0, 0, 0.5);
 }
 
 span {
+    font-weight: 100;
     user-select: none;
     pointer-events: none;
+    overflow: hidden;
+    width: 60%;
+    text-transform: capitalize;
 }
 
 .node-header {
     padding: 0.5rem 1rem;
-    background-color: brown;
+    background-color: #7FBB43;
     border-top-left-radius: 0.25rem;
     border-top-right-radius: 0.25rem;
     grid-column: 1/4;
     height: 2.5rem;
-    display: grid;
-    justify-content: flex-start;
+    display: flex;
     align-items: center;
+    gap: 1rem;
 }
 
 .node-header span {
-    text-transform: capitalize;
+    margin-right: auto;
+    color: #232323;
+    font-weight: 600;
+}
+
+.node-header img {
+    height: 1.1rem;
 }
 
 .node-field {
     display: flex;
     position: relative;
     align-items: center;
-    width: fit-content;
-    grid-column: 2/3;
     text-transform: capitalize;
+    gap: 0.4rem;
+    width: 100%;
 }
 
 
 .left-field {
+    grid-column: 1/3;
     justify-self: flex-start;
 }
 
 .right-field {
+    grid-column: 2/4;
     justify-self: flex-end;
+    justify-content: flex-end;
 }
 
 
 .field {
+    flex-grow: 1;
     /*     padding: 0.5rem;
     background-color: whitesmoke;
     color: black;
@@ -189,24 +210,16 @@ span {
 }
 
 .controll-point {
-    width: 1rem;
-    aspect-ratio: 1;
-    position: absolute;
-    background-color: lawngreen;
-    border-radius: 50%;
+    width: .6rem;
+    aspect-ratio: 1/4;
 }
 
 .in {
-    top: .05rem;
-    left: -1.5rem;
-    background-color: lawngreen;
+    background-color: #439EBB;
 }
 
 .out {
-    top: .05rem;
-    right: -1.5rem;
-
-    background-color: rgb(86, 17, 183);
+    background-color: #AA43BB;
 }
 
 /* .in {

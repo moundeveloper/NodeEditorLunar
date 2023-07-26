@@ -1,15 +1,32 @@
+@font-face {
+  font-family: "RobotoMono";
+  src: url("./assets/fonts/RobotoMono.ttf") format("true-type");
+}
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  font-family: "RobotoMono", monospace;
+}
+
+span {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 body {
   overflow: hidden;
   background-color: rgb(28, 28, 28);
-  /*   background-size: 40px 40px;
-  background-image: radial-gradient(circle, #bbbbbb 1px, rgba(0, 0, 0, 0) 1px);
-  background-color: rgb(28, 28, 28); */
 }
 
 .panning-cursor {

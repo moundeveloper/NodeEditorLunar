@@ -60,3 +60,27 @@ export class NodePrintC extends NodeC {
     return { name: this.name, value: this.nodeValue };
   }
 }
+
+export class NodeFuncC extends NodeC {
+  constructor() {
+    super(
+      "add",
+      [new ControllPointC(genId("in")), new ControllPointC(genId("in"))],
+      [new ControllPointC(genId("out"))]
+    );
+    super.nodeType = "function";
+    this.nodeValue = {
+      originalName: this.name,
+      currentVariableValue: 4,
+      variableValue: 4,
+    };
+  }
+  getInputControllPointId() {
+    const [input] = this.inputs;
+    return input.id;
+  }
+  getData() {
+    // Update return value & and return updated value
+    return { name: this.name, value: this.nodeValue };
+  }
+}

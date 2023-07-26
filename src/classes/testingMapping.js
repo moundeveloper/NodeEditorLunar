@@ -23,6 +23,8 @@ const variable = new NodeVariableC("something");
 const variable2 = new NodeVariableC("crazy");
 const variable3 = new NodeVariableC("pattume");
 const print = new NodePrintC();
+const variable4 = new NodeVariableC("another");
+const print2 = new NodePrintC();
 
 const link = new LinkC(
   genId(),
@@ -47,7 +49,22 @@ const link3 = new LinkC(
   print
 );
 
-const links = [link, link2, link3];
+const link4 = new LinkC(
+  genId(),
+  variable3.getOutputControllPointId(),
+  variable4.getInputControllPointId(),
+  variable3,
+  variable4
+);
+const link5 = new LinkC(
+  genId(),
+  variable4.getOutputControllPointId(),
+  print2.getInputControllPointId(),
+  variable4,
+  print2
+);
+
+const links = [link, link2, link3, link4, link5];
 
 const getGraph_old = (links) => {
   // Create an adjacency list representation of the graph
