@@ -35,7 +35,6 @@ const pinnedMousePosition = { x: 0, y: 0 };
 const mousePosition = { x: 0, y: 0 };
 
 const mousedown = (event) => {
-    event.preventDefault()
     if (event.button === 1) {
         initialContentsPos.x = translate.translateX;
         initialContentsPos.y = translate.translateY;
@@ -64,7 +63,9 @@ const mouseup = (event) => {
 };
 
 const zoom = (event) => {
-    // Determine before anything else. Otherwise weird jumping.
+
+    if (nodeEditor.preventZooming) return
+
     const limiter = 1000;
     if (
         zoomFactor.value - event.deltaY / limiter > 3 ||

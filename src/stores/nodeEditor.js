@@ -4,6 +4,7 @@ export const nodeEditor = reactive({
   scale: 1,
   nodes: [],
   links: [],
+  preventZooming: false,
   panningPos: { x: 0, y: 0 },
   addNode(node) {
     this.nodes.push(node);

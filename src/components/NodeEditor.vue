@@ -1,7 +1,6 @@
 <template>
     <div class="editor-wraper">
-        <Node :style="{ zIndex: 2 }" v-for="node in nodeEditor.nodes" :id="node.id" :name="node.name" :inputs="node.inputs"
-            :outputs="node.outputs" />
+        <NodeWraper :style="{ zIndex: 2 }" v-for="node in nodeEditor.nodes" :nodeData="node" />
         <svg class="path-wraper">
             <g fill="none" stroke="white" stroke-width="2" ref="pathWraper">
             </g>
@@ -10,8 +9,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted, onUnmounted } from 'vue';
-import Node from './Node.vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { getElementPositionOffset, setPathDByID, findGrandparentElementById, getElementPositionViewportById } from "../utils/htmlElement.js"
 import { genId } from "../utils/utility.js"
 import { nodeEditor } from "../stores/nodeEditor.js"
@@ -19,6 +17,7 @@ import { NodeC, NodeVariableC } from "../classes/Node"
 import { LinkC } from "../classes/Link"
 import { ControllPointC } from "../classes/ControllPoint"
 import { TypesEnum } from "../classes/Types.js";
+import NodeWraper from './NodeWraper.vue';
 
 const pathWraper = ref('')
 let isUpdateRunning = false;
@@ -33,10 +32,6 @@ nodeEditor.addNode(new NodeVariableC("frank"))
 nodeEditor.addNode(new NodeVariableC("joel"))
 
 const createLink = (sourceId, targetId, path) => {
-
-    // Check if link already exists
-    /*     const existingLink = nodeEditor.links.find(link => link.id === sourceId && link.id === targetId);
-        if (existingLink) return */
 
     const sourceFamily = findGrandparentElementById(sourceId)
     const targetFamily = findGrandparentElementById(targetId)
@@ -189,7 +184,7 @@ function clearSVGPath(path) {
 
 onMounted(() => {
     window.addEventListener("mousedown", (event) => {
-        event.preventDefault();
+
         if (typeof event.target.className !== 'string' ||
             !event.target.className.includes('controll-point')) return
 
