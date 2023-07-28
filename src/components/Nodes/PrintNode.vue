@@ -7,12 +7,6 @@
         <img src="../../assets/icons/edit-icon.svg" alt="" @click="handleEdit">
     </div>
 
-    <div class="node-field">
-        <div class="field">
-            <DropDown :label="'behaviour'" :options="['const', 'let']" v-model="variableValues.variableBehaviour" />
-        </div>
-    </div>
-
     <!-- Output fields -->
     <div v-for="output in nodeData.outputs" class="node-field right-field">
         <div class="field">
@@ -25,16 +19,15 @@
     <div v-for="input in nodeData.inputs" class="node-field left-field">
         <div :id="input.id" class="controll-point in"></div>
         <div class="field ">
-            <NumberInput v-if="variableValues.variableType === 'number'" v-model="variableValues.value" />
-            <StringInput v-if="variableValues.variableType === 'string'" v-model="variableValues.value" />
+            <NumberInput v-if="variableValues.variableType === 'number'" />
+            <StringInput v-if="variableValues.variableType === 'string'" v-model="variableValues.stringValue" />
             <DropDown :label="'value'" :options="[true, false]" v-if="variableValues.variableType === 'boolean'"
-                v-model="variableValues.value" />
+                v-model="variableValues.boolValue" />
         </div>
     </div>
 </template>
 
 <script setup>
-import { nodeEditor } from '../../stores/nodeEditor';
 import DropDown from '../Fields/DropDown.vue';
 import NumberInput from '../Fields/NumberInput.vue';
 import StringInput from '../Fields/StringInput.vue';
@@ -47,8 +40,9 @@ const props = defineProps({
 const variableValues = reactive({
     variableName: props.nodeData.name,
     variableType: props.nodeData.variableType,
-    variableBehaviour: 'const',
-    value: 3.2,
+    stringValue: "",
+    numberValue: 3.2,
+    boolValue: true
 })
 
 const variableNameContent = ref(null)
@@ -83,24 +77,6 @@ const handleBlur = (event) => {
     allowNameEdit.value = false
 }
 
-watchEffect(() => {
-    // Update node properties
-    props.nodeData.name = variableValues.variableName
-    props.nodeData.variableType = variableValues.variableType
-    props.nodeData.nodeValue.variableValue = variableValues.value
-    props.nodeData.variableBehaviour = variableValues.variableBehaviour
-
-    // De-link all nodes if variable-type doesn't match anymore
-    const connectedLinks = nodeEditor.findLinksConnectedToNode(props.nodeData)
-
-    connectedLinks.forEach((link) => {
-        if (link.sourceNode.variableType !== link.targetNode.variableType) {
-            const path = nodeEditor.removeConnectedTargetControllPoint(link)
-            path.remove()
-        }
-    })
-})
-
 </script>
 
 <style  scoped>
@@ -128,7 +104,6 @@ span {
     color: var(--primary-color);
     font-weight: 600;
     user-select: text;
-    text-transform: none;
 }
 
 .node-header img {
@@ -142,7 +117,6 @@ span {
     text-transform: capitalize;
     gap: 0.4rem;
     width: 100%;
-    grid-column: 2/3;
 }
 
 
@@ -152,6 +126,7 @@ span {
 }
 
 .right-field {
+    z-index: 4;
     grid-column: 2/4;
     justify-self: flex-end;
     justify-content: flex-end;

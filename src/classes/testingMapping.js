@@ -8,7 +8,7 @@ import {
 } from "../utils/nodeConnections.js";
 
 // Testing node links
-/* const nodeLinks = [
+const nodeLinks = [
   new LinkC(1, "cp1", "cp2", "NodeA", "NodeB"),
   new LinkC(2, "cp3", "cp4", "NodeA", "NodeD"),
   new LinkC(3, "cp5", "cp6", "NodeB", "NodeC"),
@@ -17,7 +17,7 @@ import {
   new LinkC(5, "cp9", "cp10", "NodeD", "NodeG"),
   new LinkC(6, "cp11", "cp12", "NodeE", "NodeF"),
   new LinkC(6, "cp11", "cp12", "NodeC", "NodeI"),
-]; */
+];
 
 const variable = new NodeVariableC("something");
 const variable2 = new NodeVariableC("crazy");
@@ -128,7 +128,7 @@ const getGraphSourcesTargets = (links) => {
   return adjacencyList;
 };
 
-const adjacencyList = getGraphSourcesTargets(links);
+const adjacencyList = getGraphSourcesTargets(nodeLinks);
 
 const traverseGraph = (
   nodeKey,
@@ -176,15 +176,19 @@ const convertNodeToCode = (node) => {
   console.log("from converting: " + JSON.stringify(node.getData()));
   const {
     name,
-    value: { originalName, currentVariableValue, variableValue },
+    value: { originalName, currentVariableReference, variableValue },
   } = node.getData();
 
   switch (node.nodeType) {
     case "print":
-      codeListRaw.push(printTemplate(currentVariableValue));
+      codeListRaw.push(printTemplate(currentVariableReference));
       break;
     case "variable":
-      codeListRaw.push(variableTemplate(name, currentVariableValue));
+      if (currentVariableReference === name) {
+        codeListRaw.push(variableTemplate(name, variableValue));
+      } else {
+        codeListRaw.push(variableTemplate(name, currentVariableReference));
+      }
       break;
 
     default:
@@ -192,15 +196,16 @@ const convertNodeToCode = (node) => {
   }
 };
 
-traverseGraph(variable, adjacencyList, (nodeKey, currentNode, visited) => {
-  convertNodeToCode(nodeKey);
+/* traverseGraph(variable, adjacencyList, (nodeKey, currentNode, visited) => {
+   convertNodeToCode(nodeKey);
 });
-
+ */
 const executeParsedCode = (parsedCode) => {
   // Executes the parsed code from the linked nodes
   new Function(parsedCode)();
 };
 
-console.log(codeListRaw);
+/* console.log(codeListRaw); */
+/* executeParsedCode(codeListRaw.join("\n")); */
 
-executeParsedCode(codeListRaw.join("\n"));
+console.log(adjacencyList);

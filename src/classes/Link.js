@@ -16,11 +16,11 @@ export class LinkC {
 
   // Update nodes values
   updateNodeValues() {
-    const { originalName, currentVariableValue, variableValue } =
+    const { originalName, currentVariableReference, variableValue } =
       this.sourceNode.nodeValue;
     this.targetNode.nodeValue = {
       originalName: this.targetNode.name,
-      currentVariableValue: originalName,
+      currentVariableReference: originalName,
       variableValue,
     };
   }

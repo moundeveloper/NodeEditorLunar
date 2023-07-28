@@ -1,15 +1,13 @@
 <template>
     <Teleport to="body">
         <div ref="dialog" class="dialog" v-show="isDialogOpen" :style="{ top: dialogTop + 'px', left: dialogLeft + 'px' }">
-            <h2>Dialog Content</h2>
-            <p>This is the dialog content.</p>
-
+            <slot name="activator" :closeDialog="closeDialog"></slot>
         </div>
     </Teleport>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, onBeforeMount } from 'vue';
+import { ref, onMounted, onUnmounted, } from 'vue';
 
 const dialog = ref()
 const isDialogOpen = ref(false);
@@ -47,10 +45,11 @@ onMounted(() => {
     document.addEventListener('keydown', handleKeyDown);
 });
 
-onBeforeUnmount(() => {
+onUnmounted(() => {
     document.removeEventListener('keydown', handleKeyDown);
     dialog.value.removeEventListener('mouseleave', handleMouseOutside);
 });
+
 </script>
 
 <style scoped>
@@ -59,11 +58,14 @@ onBeforeUnmount(() => {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 300px;
-    height: 200px;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    padding: 20px;
+    background-color: var(--primary-color);
+    border-radius: 0.1rem;
+    padding: 2rem;
+    max-width: 30rem;
+    min-width: 400px;
+    width: clamp(350px, 3vw, 400px);
     z-index: 4;
+    border-radius: 0.1rem;
+    outline: 1px solid var(--tertiary-color);
 }
 </style>

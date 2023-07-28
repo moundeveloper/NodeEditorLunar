@@ -18,13 +18,14 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, watch } from 'vue';
 
 
 const currentValue = ref(3.2)
 const editable = ref(false)
 const editableElement = ref(null)
 
+const emits = defineEmits();
 let isDragging = false
 let startX = 0;
 let startValue = 0;
@@ -98,6 +99,10 @@ const stopDrag = () => {
     isDragging = false;
 };
 
+watch(currentValue, (newValue) => {
+    emits('update:modelValue', newValue);
+})
+
 </script>
 
 <style scoped>
@@ -116,14 +121,14 @@ const stopDrag = () => {
 }
 
 button {
-    background-color: #6A6A6A;
+    background-color: var(--accent-color);
     border: none;
     cursor: pointer;
     padding-inline: 0.2rem;
 }
 
 button:active {
-    background-color: #454545;
+    background-color: var(--secondary-color);
 }
 
 button:first-child img {
@@ -135,7 +140,7 @@ button:last-child img {
 }
 
 .number-input-body {
-    background-color: #454545;
+    background-color: var(--secondary-color);
     flex-grow: 1;
     display: flex;
     align-items: center;
@@ -149,7 +154,11 @@ button:last-child img {
     height: 100%;
     display: flex;
     align-items: center;
-    background-color: #454545;
+    background-color: var(--secondary-color);
     padding-inline: 0.5rem;
+}
+
+.editable-value:focus-visible {
+    outline-color: var(--tertiary-color);
 }
 </style>

@@ -24,13 +24,14 @@ const updateCurrentValue = (event) => {
 <style scoped>
 textarea {
     width: 100%;
-    background-color: #454545;
-    color: white;
+    background-color: var(--secondary-color);
+    color: var(--tertiary-color);
     padding: 0.5rem;
     user-select: text;
     border-radius: 0.1rem;
     word-break: break-all;
     word-wrap: break-word;
     resize: none;
+    border: none;
 }
 </style>

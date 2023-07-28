@@ -4,12 +4,19 @@ import { TypesEnum } from "./Types.js";
 
 export class NodeC {
   nodeType;
-  constructor(name, inputs = [], outputs = [], fields = []) {
+  constructor(
+    name,
+    inputs = [],
+    outputs = [],
+    fields = [],
+    position = { x: 0, y: 0 }
+  ) {
     this.id = genId();
     this.name = name;
     this.inputs = inputs;
     this.outputs = outputs;
     this.fields = fields;
+    this.position = position;
   }
 }
 
@@ -22,9 +29,10 @@ export class NodeVariableC extends NodeC {
     );
     super.nodeType = "variable";
     this.variableType = TypesEnum.Number;
+    this.variableBehaviour = "const";
     this.nodeValue = {
       originalName: this.name,
-      currentVariableValue: 4,
+      currentVariableReference: this.name,
       variableValue: 4,
     };
   }
@@ -41,7 +49,11 @@ export class NodeVariableC extends NodeC {
   }
   getData() {
     // Update return value & and return updated value
-    return { name: this.name, value: this.nodeValue };
+    return {
+      variableBehaviour: this.variableBehaviour,
+      name: this.name,
+      value: this.nodeValue,
+    };
   }
 }
 
@@ -71,7 +83,7 @@ export class NodeFuncC extends NodeC {
     super.nodeType = "function";
     this.nodeValue = {
       originalName: this.name,
-      currentVariableValue: 4,
+      currentVariableReference: this.name,
       variableValue: 4,
     };
   }

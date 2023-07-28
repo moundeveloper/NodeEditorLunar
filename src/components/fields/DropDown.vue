@@ -33,6 +33,8 @@ const currentState = ref(states.CLOSED)
 const dropdownMenu = ref(null)
 const selected = ref(props.options[0])
 
+emits('update:modelValue', selected.value);
+
 const handleDropDown = (event) => {
     if (event.target !== dropdownMenu)
 
@@ -81,14 +83,13 @@ img {
 .dropdown-wraper {
     width: 100%;
     position: relative;
-    z-index: 2;
 }
 
 .dropdown-header {
     display: flex;
     align-items: center;
     padding: 0.5rem 1rem;
-    background-color: #323232;
+    background-color: var(--primary-accent-color);
     border-radius: 0.1rem;
     cursor: pointer;
 }
@@ -101,9 +102,10 @@ img {
 .dropdown-body {
     position: absolute;
     margin-top: 0.5rem;
-    background-color: #323232;
+    background-color: var(--primary-accent-color);
     width: 100%;
     padding: 0.5rem 0.5rem;
+    z-index: 2;
 }
 
 ul {
@@ -118,6 +120,6 @@ li {
 }
 
 li:hover {
-    background-color: #6A6A6A;
+    background-color: var(--secondary-color);
 }
 </style>

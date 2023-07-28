@@ -1,7 +1,12 @@
 <template>
-  <div>
-    <Dialog :position="{ x, y }" />
+  <div class="app-wraper">
+    <Dialog :position="{ x, y }">
+      <template v-slot:activator="{ closeDialog }">
+        <AddNode :closeDialog="closeDialog" />
+      </template>
+    </Dialog>
     <PanningZoomingEditor />
+    <WidgetPannel />
   </div>
 </template>
 
@@ -9,18 +14,14 @@
 import PanningZoomingEditor from "./components/PanningZoomingEditor.vue";
 import Dialog from "./components/Dialog.vue";
 import { useMouse } from './composables/mouse.js';
+import WidgetPannel from "./components/WidgetPannel.vue";
+import AddNode from "./components/Widgets/AddNode.vue";
 
 const { x, y } = useMouse()
 </script>
 
 <style scoped>
-.wraper {
+.app-wraper {
   display: flex;
-}
-
-.block {
-  width: 20rem;
-  height: 100vh;
-  background-color: red;
 }
 </style>

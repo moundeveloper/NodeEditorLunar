@@ -24,7 +24,6 @@
         <div :id="input.id" class="controll-point in"></div>
         <div class="field ">
             <NumberInput />
-            <!-- <span>{{ input.type }}</span> -->
         </div>
     </div>
 </template>
@@ -32,19 +31,6 @@
 <script setup>
 import DropDown from '../Fields/DropDown.vue';
 import NumberInput from '../Fields/NumberInput.vue';
-
-const nodeTypes = [
-    {
-        type: "variable",
-        color: "#7FBB43",
-        icon: "@/assets/icons/variable-icon.svg",
-    },
-    {
-        type: "print",
-        color: "#5458AD",
-        icon: "@/assets/icons/print-icon.svg",
-    },
-]
 
 const props = defineProps({
     nodeData: Object
@@ -73,10 +59,9 @@ span {
 
 .node-header span {
     margin-right: auto;
-    color: #232323;
+    color: var(--primary-color);
     font-weight: 600;
-    user-select: none;
-    pointer-events: none;
+    user-select: text;
 }
 
 .node-header img {
@@ -86,7 +71,7 @@ span {
 .node-field {
     display: flex;
     position: relative;
-    align-items: center;
+    align-items: flex-start;
     text-transform: capitalize;
     gap: 0.4rem;
     width: 100%;
@@ -99,6 +84,7 @@ span {
 }
 
 .right-field {
+    z-index: 4;
     grid-column: 2/4;
     justify-self: flex-end;
     justify-content: flex-end;
@@ -110,15 +96,17 @@ span {
 }
 
 .controll-point {
-    width: .6rem;
+    min-width: .6rem;
     aspect-ratio: 1/4;
+    transform: translateY(-5%);
 }
 
 .in {
-    background-color: #439EBB;
+    background-color: var(--input-color);
+
 }
 
 .out {
-    background-color: #AA43BB;
+    background-color: var(--output-color);
 }
 </style>

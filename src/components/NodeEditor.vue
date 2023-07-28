@@ -27,14 +27,30 @@ let isMouseDown = false;
 let path, startPos, startBoxId
 let startingPosition = { x: 0, y: 0 }
 
-nodeEditor.addNode(new NodeVariableC("billy"))
-nodeEditor.addNode(new NodeVariableC("frank"))
-nodeEditor.addNode(new NodeVariableC("joel"))
+const billy = new NodeVariableC("billy")
+billy.position.x = 800
+billy.position.y = 200
+const frank = new NodeVariableC("frank")
+frank.position.x = 400
+frank.position.y = 400
+const joel = new NodeVariableC("joel")
+joel.position.x = 40
+joel.position.y = 40
+
+
+nodeEditor.addNode(billy)
+nodeEditor.addNode(frank)
+nodeEditor.addNode(joel)
+
 
 const createLink = (sourceId, targetId, path) => {
 
     const sourceFamily = findGrandparentElementById(sourceId)
     const targetFamily = findGrandparentElementById(targetId)
+
+    /*     const sourceNodeObject = nodeEditor.getNodeById(sourceFamily.grandparent.id)
+        const targetNodeObject = nodeEditor.getNodeById(targetFamily.grandparent.id)
+        if (sourceNodeObject.variableType !== targetNodeObject.variableType) return */
 
     if (document.getElementById(targetId).className === "controll-point in") {
         const sourceLinkLimitSelf = nodeEditor.checkSourceLink(targetId)
@@ -66,11 +82,9 @@ const createLink = (sourceId, targetId, path) => {
     })
     const startPos = getElementPositionOffset(sourceId)
     const endPos = getElementPositionOffset(targetId)
-    console.log(sourceControllPoint, targetControllPoint)
     const { d } = generateDpath(startPos, endPos)
     const link = new LinkC(genId(), sourceControllPoint, targetControllPoint, sourceNode, targetNode)
 
-    console.log(link)
     path.setAttribute("id", link.id)
     path.setAttribute("d", d)
 
@@ -177,7 +191,7 @@ function updateSVGPath(x, y) {
 
 function clearSVGPath(path) {
     if (path) {
-        pathWraper.value.removeChild(path);
+        path.remove()
         path = null;
     }
 }
@@ -254,6 +268,17 @@ onMounted(() => {
             }
 
             const targetBoxId = targetElement?.id;
+
+
+            const sourceFamily = findGrandparentElementById(startBoxId)
+            const targetFamily = findGrandparentElementById(targetBoxId)
+
+            const sourceNodeObject = nodeEditor.getNodeById(sourceFamily.grandparent.id)
+            const targetNodeObject = nodeEditor.getNodeById(targetFamily.grandparent.id)
+            if (sourceNodeObject.variableType !== targetNodeObject.variableType) {
+                clearSVGPath(path);
+                return
+            }
 
             if (targetBoxId && targetBoxId !== startBoxId) {
                 // Anchor the SVG path

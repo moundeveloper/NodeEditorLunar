@@ -12,6 +12,20 @@ export const nodeEditor = reactive({
   addLink(link) {
     this.links.push(link);
   },
+  getNodeById(id) {
+    return this.nodes.find((node) => node.id === id);
+  },
+  findLinksConnectedToNode(targetNode) {
+    const connectedLinks = [];
+
+    for (const link of this.links) {
+      if (link.sourceNode === targetNode || link.targetNode === targetNode) {
+        connectedLinks.push(link);
+      }
+    }
+
+    return connectedLinks;
+  },
   checkSourceLink(cpId) {
     return this.links.find((link) => link.sourceControllPoint.id === cpId);
   },

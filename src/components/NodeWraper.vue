@@ -6,18 +6,18 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue';
+import { ref, reactive } from 'vue';
 import { nodeEditor } from "../stores/nodeEditor.js"
 import VariableNode from './Nodes/VariableNode.vue'
-
-const node = ref(null)
-const startPosition = ref({ x: 0, y: 0 });
-const currentPosition = ref({ x: 0, y: 0 });
-const position = ref({ x: 0, y: 0 });
 
 const props = defineProps({
     nodeData: Object
 })
+
+const node = ref(null)
+const startPosition = ref({ x: props.nodeData.position.x, y: props.nodeData.position.y });
+const currentPosition = ref({ x: props.nodeData.position.x, y: props.nodeData.position.y });
+const position = ref({ x: props.nodeData.position.x, y: props.nodeData.position.y });
 
 // Handle dragging responsiveness
 const dragStore = reactive({
@@ -29,7 +29,6 @@ const dragStore = reactive({
         this.isDragging = false;
     },
 });
-
 
 // Listeners for moving the node
 window.addEventListener("mousemove", drag)
@@ -74,10 +73,10 @@ function endDrag() {
     top: 0;
     width: 18rem;
     aspect-ratio: 3/2;
-    background-color: #232323;
+    background-color: var(--primary-color);
     border-radius: 0.1rem;
     font-family: Arial, Helvetica, sans-serif;
-    color: white;
+    color: var(--tertiary-color);
     display: grid;
     grid-template-columns: 1rem 1fr 1rem;
     grid-auto-flow: row;
