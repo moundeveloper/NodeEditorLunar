@@ -21,7 +21,7 @@
 
 <script setup>
 import { ref, nextTick } from "vue";
-import { NodeC, NodeVariableC } from "../../classes/Node"
+import { NodeC, NodeVariableC, NodePrintC } from "../../classes/Node"
 import { nodeEditor } from "../../stores/nodeEditor";
 import Dialog from "../Dialog.vue";
 import Modal from "../Modal.vue";
@@ -36,32 +36,41 @@ const props = defineProps({
 })
 
 const handleOpenModal = (nodeType) => {
+    props.closeDialog()
     selectedType.value = nodeType
+    if (nodeType !== "variable") {
+        createNode()
+        return
+    }
     modal.value.openModal()
     nextTick(() => {
         input.value.focus()
     })
-    props.closeDialog()
 }
 
 const handleKeyEnter = (event) => {
     if (event.keyCode === 13 || event.key === 'Enter') {
-        switch (selectedType.value) {
-            case "variable":
-                const newNode = new NodeVariableC(event.target.value)
-                console.log(newNode)
-                nodeEditor.addNode(newNode)
-                break;
-            case "print":
 
-                break;
-
-            default:
-                break;
-        }
+        createNode(event)
         event.target.value = ""
         modal.value.closeModal()
     }
+}
+
+const createNode = (event = null) => {
+    let newNode = null
+    switch (selectedType.value) {
+        case "variable":
+            newNode = new NodeVariableC(event.target.value)
+            break;
+        case "print":
+            newNode = new NodePrintC()
+            break;
+        default:
+            break;
+    }
+
+    nodeEditor.addNode(newNode)
 }
 
 </script>

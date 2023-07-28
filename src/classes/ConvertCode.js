@@ -39,6 +39,23 @@ export const convertNodeToCode = (node, codeListRaw) => {
 };
 
 export const executeParsedCode = (parsedCode) => {
-  // Executes the parsed code from the linked nodes
-  new Function(parsedCode)();
+  // Store the original console.log function
+  const originalConsoleLog = console.log;
+
+  // Variable to capture the output
+  let capturedOutput = "";
+
+  // Replace console.log with a custom function that captures the output
+  console.log = (...args) => {
+    capturedOutput += args.map((arg) => String(arg)).join(" ") + "\n";
+  };
+
+  // Execute the parsed code
+  const result = new Function(parsedCode)();
+
+  // Restore the original console.log function
+  console.log = originalConsoleLog;
+
+  // Return the captured output as a string
+  return capturedOutput;
 };

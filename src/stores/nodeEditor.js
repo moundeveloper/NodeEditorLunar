@@ -34,7 +34,12 @@ export const nodeEditor = reactive({
   },
   removeConnectedTargetControllPoint(removeLink) {
     const path = document.getElementById(removeLink.id);
-    this.links = this.links.filter((link) => link.id !== removeLink.id);
+    this.links = this.links.filter((link) => {
+      if (link.id !== removeLink.id) {
+        return link;
+      }
+      link.targetNode.nodeValue.currentVariableReference = link.targetNode.name;
+    });
     console.log("Link deleted successfully!");
     return path;
   },

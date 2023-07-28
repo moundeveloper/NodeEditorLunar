@@ -206,6 +206,7 @@ onMounted(() => {
         const { x, y } = getElementPositionOffset(event.target.id)
         startBoxId = event.target.id;
 
+        // Remove path and remove link if there is already
         if (document.getElementById(startBoxId).className === "controll-point in") {
             const sourceLinkLimitSelf = nodeEditor.checkSourceLink(startBoxId)
             if (sourceLinkLimitSelf) {
@@ -275,11 +276,13 @@ onMounted(() => {
 
             const sourceNodeObject = nodeEditor.getNodeById(sourceFamily.grandparent.id)
             const targetNodeObject = nodeEditor.getNodeById(targetFamily.grandparent.id)
-            if (sourceNodeObject.variableType !== targetNodeObject.variableType) {
-                clearSVGPath(path);
-                return
+            if (sourceNodeObject.nodeType === "variable" && targetNodeObject.nodeType === "variable") {
+                if (sourceNodeObject.variableType !== targetNodeObject.variableType) {
+                    clearSVGPath(path);
+                    return
+                }
             }
-
+            // Create link between nodes
             if (targetBoxId && targetBoxId !== startBoxId) {
                 // Anchor the SVG path
                 const newLink = createLink(startBoxId, targetBoxId, path)

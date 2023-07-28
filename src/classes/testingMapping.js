@@ -208,4 +208,25 @@ const executeParsedCode = (parsedCode) => {
 /* console.log(codeListRaw); */
 /* executeParsedCode(codeListRaw.join("\n")); */
 
+function findLeftmostSourceElement(map) {
+  // Function to check if a node has sources
+  function hasSources(node) {
+    return map.get(node).sources.length === 0;
+  }
+
+  // Find all nodes with no sources
+  const nodesWithNoSources = Array.from(map.keys()).filter(hasSources);
+
+  // Find the leftmost node with no sources
+  let leftmostNode = nodesWithNoSources[0];
+  for (let i = 1; i < nodesWithNoSources.length; i++) {
+    if (map.get(nodesWithNoSources[i]).targets.includes(leftmostNode)) {
+      leftmostNode = nodesWithNoSources[i];
+    }
+  }
+
+  return leftmostNode;
+}
+
 console.log(adjacencyList);
+console.log(findLeftmostSourceElement(adjacencyList));

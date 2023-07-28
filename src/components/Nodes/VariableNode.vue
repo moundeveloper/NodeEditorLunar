@@ -94,10 +94,15 @@ watchEffect(() => {
     const connectedLinks = nodeEditor.findLinksConnectedToNode(props.nodeData)
 
     connectedLinks.forEach((link) => {
-        if (link.sourceNode.variableType !== link.targetNode.variableType) {
-            const path = nodeEditor.removeConnectedTargetControllPoint(link)
-            path.remove()
+        if (link.sourceNode.nodeType === "variable" && link.targetNode.nodeType === "variable") {
+            if (link.sourceNode.variableType !== link.targetNode.variableType) {
+
+                link.targetNode.nodeValue.currentVariableReference = link.targetNode.name
+                const path = nodeEditor.removeConnectedTargetControllPoint(link)
+                path.remove()
+            }
         }
+
     })
 })
 

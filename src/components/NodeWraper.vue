@@ -2,6 +2,7 @@
     <div :id="nodeData.id" :style="`left:${position.x}px; top: ${position.y}px;`" ref="node" class="node-wraper"
         @mousedown="startDrag">
         <VariableNode v-if="nodeData.nodeType === 'variable'" :nodeData="nodeData" />
+        <PrintNode v-if="nodeData.nodeType === 'print'" :nodeData="nodeData" />
     </div>
 </template>
 
@@ -9,6 +10,7 @@
 import { ref, reactive } from 'vue';
 import { nodeEditor } from "../stores/nodeEditor.js"
 import VariableNode from './Nodes/VariableNode.vue'
+import PrintNode from './Nodes/PrintNode.vue';
 
 const props = defineProps({
     nodeData: Object

@@ -1,28 +1,17 @@
 <template>
     <div class="node-header">
-        <img src="../../assets/icons/variable-icon.svg" alt="">
-        <span :style="[!allowNameEdit ? { pointerEvents: 'none', userSelect: 'none' } : '']" ref="variableNameContent"
-            :contenteditable="allowNameEdit" @keydown="handleKeyDown" @blur="handleBlur">{{ variableValues.variableName }}
+        <img src="../../assets/icons/print-icon.svg" alt="">
+        <span>{{ variableValues.variableName }}
         </span>
-        <img src="../../assets/icons/edit-icon.svg" alt="" @click="handleEdit">
-    </div>
-
-    <!-- Output fields -->
-    <div v-for="output in nodeData.outputs" class="node-field right-field">
-        <div class="field">
-            <DropDown :label="'type'" :options="values" v-model="variableValues.variableType" />
-        </div>
-        <div :id="output.id" class="controll-point out"></div>
     </div>
 
     <!-- Input fields -->
     <div v-for="input in nodeData.inputs" class="node-field left-field">
         <div :id="input.id" class="controll-point in"></div>
         <div class="field ">
-            <NumberInput v-if="variableValues.variableType === 'number'" />
-            <StringInput v-if="variableValues.variableType === 'string'" v-model="variableValues.stringValue" />
-            <DropDown :label="'value'" :options="[true, false]" v-if="variableValues.variableType === 'boolean'"
-                v-model="variableValues.boolValue" />
+            <div class="print-in-wraper">
+                <span>value</span>
+            </div>
         </div>
     </div>
 </template>
@@ -45,41 +34,13 @@ const variableValues = reactive({
     boolValue: true
 })
 
-const variableNameContent = ref(null)
-const allowNameEdit = ref(false)
-
-const values = [
-    "number",
-    "string",
-    "boolean",
-    "array",
-    "object",
-    "null",
-    "undefined",
-]
-
-const handleEdit = () => {
-    allowNameEdit.value = !allowNameEdit.value
-}
-
-const handleKeyDown = (event) => {
-    if (event.keyCode === 13 || event.key === 'Enter') {
-        event.preventDefault();
-        if (event.target === variableNameContent.value) {
-            variableValues.variableName = variableNameContent.value?.innerText
-            allowNameEdit.value = false
-        }
-    }
-}
-
-const handleBlur = (event) => {
-    variableValues.variableName = variableNameContent.value?.innerText
-    allowNameEdit.value = false
-}
-
 </script>
 
 <style  scoped>
+.print-in-wraper {
+    padding: 0.5rem;
+}
+
 span {
     font-weight: 100;
     overflow: hidden;
@@ -89,7 +50,7 @@ span {
 
 .node-header {
     padding: 0.5rem 1rem;
-    background-color: #7FBB43;
+    background-color: #5458AD;
     border-top-left-radius: 0.25rem;
     border-top-right-radius: 0.25rem;
     grid-column: 1/4;
@@ -103,7 +64,8 @@ span {
     margin-right: auto;
     color: var(--primary-color);
     font-weight: 600;
-    user-select: text;
+    user-select: none;
+    pointer-events: none;
 }
 
 .node-header img {

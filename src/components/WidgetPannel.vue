@@ -6,16 +6,20 @@
         <div class="display">
             <p v-for="code in structure">{{ code }}</p>
         </div>
+        <div class="code-result">
+            <p>result:{{ codeResult }}</p>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { getGraphSourcesTargets, traverseGraph } from "../classes/GraphNode.js"
+import { getGraphSourcesTargets, traverseGraph, findLeftmostSourceElement } from "../classes/GraphNode.js"
 import { convertNodeToCode, executeParsedCode } from "../classes/ConvertCode.js"
 import { nodeEditor } from "../stores/nodeEditor";
 import { ref } from "vue";
 
 const structure = ref(null)
+const codeResult = ref(null)
 
 structure.value = getGraphSourcesTargets(nodeEditor.links)
 
@@ -25,14 +29,13 @@ const handleRun = () => {
     const codeListRaw = [];
 
     const [[k, v]] = adjacencyList
-    traverseGraph(k, adjacencyList, (nodeKey, currentNode, visited) => {
+    traverseGraph(findLeftmostSourceElement(adjacencyList), adjacencyList, (nodeKey, currentNode, visited) => {
         convertNodeToCode(nodeKey, codeListRaw);
     });
 
-    console.log(codeListRaw);
-
-    /* executeParsedCode(codeListRaw.join("\n")); */
     structure.value = codeListRaw
+    console.log(executeParsedCode(codeListRaw.join("\n")))
+    codeResult.value = executeParsedCode(codeListRaw.join("\n"));
 }
 
 </script>
@@ -69,12 +72,20 @@ const handleRun = () => {
     background-color: rgb(4, 184, 184)
 }
 
-.display {
+.display,
+.code-result {
     flex-grow: 1;
     border-radius: 0.1rem;
     outline: 1px solid var(--primary-color);
     padding: 0.5rem;
-    user-select: text;
     pointer-events: visible;
+}
+
+.code-result {
+    height: 5rem;
+}
+
+p {
+    user-select: text;
 }
 </style>
