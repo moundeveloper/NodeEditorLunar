@@ -1,8 +1,7 @@
 <template>
-    <div :id="nodeData.id" :style="`left:${position.x}px; top: ${position.y}px;`" ref="node" class="node-wraper"
-        @mousedown="startDrag">
-        <VariableNode v-if="nodeData.nodeType === 'variable'" :nodeData="nodeData" />
-        <PrintNode v-if="nodeData.nodeType === 'print'" :nodeData="nodeData" />
+    <div :id="node.id" :style="`left:${position.x}px; top: ${position.y}px;`" class="node-wraper" @mousedown="startDrag">
+        <VariableNode v-if="node.nodeType === 'variable'" :node="node" />
+        <PrintNode v-if="node.nodeType === 'print'" :node="node" />
     </div>
 </template>
 
@@ -13,13 +12,12 @@ import VariableNode from './Nodes/VariableNode.vue'
 import PrintNode from './Nodes/PrintNode.vue';
 
 const props = defineProps({
-    nodeData: Object
+    node: Object
 })
 
-const node = ref(null)
-const startPosition = ref({ x: props.nodeData.position.x, y: props.nodeData.position.y });
-const currentPosition = ref({ x: props.nodeData.position.x, y: props.nodeData.position.y });
-const position = ref({ x: props.nodeData.position.x, y: props.nodeData.position.y });
+const startPosition = ref({ x: props.node.position.x, y: props.node.position.y });
+const currentPosition = ref({ x: props.node.position.x, y: props.node.position.y });
+const position = ref({ x: props.node.position.x, y: props.node.position.y });
 
 // Handle dragging responsiveness
 const dragStore = reactive({
@@ -73,14 +71,14 @@ function endDrag() {
     position: absolute;
     left: 0;
     top: 0;
-    width: 18rem;
+    width: 20rem;
     aspect-ratio: 3/2;
     background-color: var(--primary-color);
     border-radius: 0.1rem;
     font-family: Arial, Helvetica, sans-serif;
     color: var(--tertiary-color);
     display: grid;
-    grid-template-columns: 1rem 1fr 1rem;
+    grid-template-columns: 1.25rem 1fr 1.25rem;
     grid-auto-flow: row;
     gap: 1rem 0;
     padding-bottom: 1rem;

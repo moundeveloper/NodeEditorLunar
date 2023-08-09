@@ -5,7 +5,7 @@
         </button>
         <div class="number-input-body" @mousedown="startDrag" @mousemove="handleDrag" @mouseup="stopDrag"
             @dblclick="handleDoubleClick">
-            <span>value</span>
+            <span>{{ data.options.label }}</span>
             <span>{{ computedValue }}</span>
         </div>
         <button @click="handleAdd">
@@ -19,13 +19,24 @@
 
 <script setup>
 import { ref, computed, nextTick, watch } from 'vue';
+import { InterfaceC } from '../../classes/Interface';
 
 
-const currentValue = ref(3.2)
+const props = defineProps({
+    data: {
+        interface: InterfaceC,
+        options: {
+            label: String,
+            defaultValue: Number
+        }
+    },
+    updateHandler: Function
+})
+
+const currentValue = ref(props.data.options.defaultValue)
 const editable = ref(false)
 const editableElement = ref(null)
 
-const emits = defineEmits();
 let isDragging = false
 let startX = 0;
 let startValue = 0;
@@ -100,7 +111,7 @@ const stopDrag = () => {
 };
 
 watch(currentValue, (newValue) => {
-    emits('update:modelValue', newValue);
+    props.updateHandler({ interfaceId: props.data.interface.id, value: newValue })
 })
 
 </script>

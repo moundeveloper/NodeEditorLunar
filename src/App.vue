@@ -6,7 +6,7 @@
       </template>
     </Dialog>
     <PanningZoomingEditor />
-    <WidgetPannel />
+    <!--     <WidgetPannel /> -->
   </div>
 </template>
 

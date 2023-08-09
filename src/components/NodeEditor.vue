@@ -1,6 +1,6 @@
 <template>
     <div class="editor-wraper">
-        <NodeWraper :style="{ zIndex: 2 }" v-for="node in nodeEditor.nodes" :nodeData="node" />
+        <NodeWraper :style="{ zIndex: 2 }" v-for="node in nodeEditor.nodes" :node="node" />
         <svg class="path-wraper">
             <g fill="none" stroke="white" stroke-width="2" ref="pathWraper">
             </g>
@@ -15,8 +15,6 @@ import { genId } from "../utils/utility.js"
 import { nodeEditor } from "../stores/nodeEditor.js"
 import { NodeC, NodeVariableC } from "../classes/Node"
 import { LinkC } from "../classes/Link"
-import { ControllPointC } from "../classes/ControllPoint"
-import { TypesEnum } from "../classes/Types.js";
 import NodeWraper from './NodeWraper.vue';
 
 const pathWraper = ref('')
@@ -37,7 +35,6 @@ const joel = new NodeVariableC("joel")
 joel.position.x = 40
 joel.position.y = 40
 
-
 nodeEditor.addNode(billy)
 nodeEditor.addNode(frank)
 nodeEditor.addNode(joel)
@@ -48,42 +45,39 @@ const createLink = (sourceId, targetId, path) => {
     const sourceFamily = findGrandparentElementById(sourceId)
     const targetFamily = findGrandparentElementById(targetId)
 
-    /*     const sourceNodeObject = nodeEditor.getNodeById(sourceFamily.grandparent.id)
-        const targetNodeObject = nodeEditor.getNodeById(targetFamily.grandparent.id)
-        if (sourceNodeObject.variableType !== targetNodeObject.variableType) return */
+    if (document.getElementById(targetId).className === "interface in") {
 
-    if (document.getElementById(targetId).className === "controll-point in") {
         const sourceLinkLimitSelf = nodeEditor.checkSourceLink(targetId)
         if (sourceLinkLimitSelf) {
-            const pathToRemove = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitSelf)
+            const pathToRemove = nodeEditor.removeConnectedTargetLink(sourceLinkLimitSelf)
             clearSVGPath(pathToRemove)
         }
 
         const sourceLinkLimitTarget = nodeEditor.checkTargetLink(targetId)
         if (sourceLinkLimitTarget) {
-            const pathToRemove = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitTarget)
+            const pathToRemove = nodeEditor.removeConnectedTargetLink(sourceLinkLimitTarget)
             clearSVGPath(pathToRemove)
         }
     }
 
-    let sourceControllPoint = null
-    let targetControllPoint = null
+    let sourceInterface = null
+    let targetInterface = null
     let sourceNode = null
     let targetNode = null
-    nodeEditor.updateNodeControllPoint(sourceFamily.grandparent.id, sourceId, (controllPoint, node) => {
+    nodeEditor.updateNodeInterface(sourceFamily.grandparent.id, sourceId, (controllPoint, node) => {
         sourceNode = node
-        sourceControllPoint = controllPoint
+        sourceInterface = controllPoint
         controllPoint.to = targetId
     })
-    nodeEditor.updateNodeControllPoint(targetFamily.grandparent.id, targetId, (controllPoint, node) => {
+    nodeEditor.updateNodeInterface(targetFamily.grandparent.id, targetId, (controllPoint, node) => {
         targetNode = node
-        targetControllPoint = controllPoint
+        targetInterface = controllPoint
         controllPoint.to = sourceId
     })
     const startPos = getElementPositionOffset(sourceId)
     const endPos = getElementPositionOffset(targetId)
     const { d } = generateDpath(startPos, endPos)
-    const link = new LinkC(genId(), sourceControllPoint, targetControllPoint, sourceNode, targetNode)
+    const link = new LinkC(genId(), sourceInterface, targetInterface, sourceNode, targetNode)
 
     path.setAttribute("id", link.id)
     path.setAttribute("d", d)
@@ -101,8 +95,8 @@ const createNode = () => {
 }
 
 const updateLink = (link) => {
-    const sourcePos = getElementPositionOffset(link.sourceControllPoint.id)
-    const targetPos = getElementPositionOffset(link.targetControllPoint.id)
+    const sourcePos = getElementPositionOffset(link.sourceInterface.id)
+    const targetPos = getElementPositionOffset(link.targetInterface.id)
     const { d } = generateDpath(sourcePos, targetPos)
     setPathDByID(link.id, d)
 }
@@ -200,18 +194,18 @@ onMounted(() => {
     window.addEventListener("mousedown", (event) => {
 
         if (typeof event.target.className !== 'string' ||
-            !event.target.className.includes('controll-point')) return
+            !event.target.className.includes('interface')) return
 
         isMouseDown = true;
         const { x, y } = getElementPositionOffset(event.target.id)
         startBoxId = event.target.id;
 
         // Remove path and remove link if there is already
-        if (document.getElementById(startBoxId).className === "controll-point in") {
+        if (document.getElementById(startBoxId).className === "interface in") {
             const sourceLinkLimitSelf = nodeEditor.checkSourceLink(startBoxId)
             if (sourceLinkLimitSelf) {
-                const removedPath = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitSelf)
-                startBoxId = sourceLinkLimitSelf.targetControllPoint.id
+                const removedPath = nodeEditor.removeConnectedTargetLink(sourceLinkLimitSelf)
+                startBoxId = sourceLinkLimitSelf.targetInterface.id
                 const { x, y } = getElementPositionOffset(startBoxId)
                 const { xV, yV } = getElementPositionViewportById(startBoxId)
                 startingPosition.x = xV / nodeEditor.scale - x;
@@ -222,8 +216,8 @@ onMounted(() => {
 
             const sourceLinkLimitTarget = nodeEditor.checkTargetLink(startBoxId)
             if (sourceLinkLimitTarget) {
-                const removedPath = nodeEditor.removeConnectedTargetControllPoint(sourceLinkLimitTarget)
-                startBoxId = sourceLinkLimitTarget.sourceControllPoint.id
+                const removedPath = nodeEditor.removeConnectedTargetLink(sourceLinkLimitTarget)
+                startBoxId = sourceLinkLimitTarget.sourceInterface.id
                 const { x, y } = getElementPositionOffset(startBoxId)
                 const { xV, yV } = getElementPositionViewportById(startBoxId)
                 startingPosition.x = xV / nodeEditor.scale - x;
@@ -256,7 +250,7 @@ onMounted(() => {
                 event.clientY
             );
 
-            if (typeof targetElement.className !== 'string' || !targetElement.className.includes("controll-point")) {
+            if (typeof targetElement.className !== 'string' || !targetElement.className.includes("interface")) {
                 clearSVGPath(path);
                 isMouseDown = false;
                 return
@@ -276,8 +270,14 @@ onMounted(() => {
 
             const sourceNodeObject = nodeEditor.getNodeById(sourceFamily.grandparent.id)
             const targetNodeObject = nodeEditor.getNodeById(targetFamily.grandparent.id)
+
+            const sourceInterface = sourceNodeObject.outputs.find(input => input.id)
+            const targetInterface = targetNodeObject.inputs.find(output => output.id)
+
             if (sourceNodeObject.nodeType === "variable" && targetNodeObject.nodeType === "variable") {
-                if (sourceNodeObject.variableType !== targetNodeObject.variableType) {
+                console.log(sourceInterface.type)
+                console.log(targetInterface.type)
+                if (sourceInterface.type !== targetInterface.type) {
                     clearSVGPath(path);
                     return
                 }

@@ -7,62 +7,74 @@
         <img src="../../assets/icons/edit-icon.svg" alt="" @click="handleEdit">
     </div>
 
-    <div class="node-field">
+    <!-- Output fields -->
+    <div v-for="output in node.outputs" class="node-field right-field">
         <div class="field">
-            <DropDown :label="'behaviour'" :options="['const', 'let']" v-model="variableValues.variableBehaviour" />
+            <FieldWraper :field="{
+                fieldName: output.component,
+                data: {
+                    interface: output,
+                    options: {
+                        label: output.options.label,
+                        values: output.options.values,
+                    }
+                }, updateHandler:
+                    handleUpdatedOutputType
+            }" />
         </div>
+        <div :id="output.id" class="interface out"></div>
     </div>
 
-    <!-- Output fields -->
-    <div v-for="output in nodeData.outputs" class="node-field right-field">
+    <!-- Fields -->
+    <div v-for="option in node.options" class="node-field">
         <div class="field">
-            <DropDown :label="'type'" :options="values" v-model="variableValues.variableType" />
+            <FieldWraper :field="{
+                fieldName: option.component,
+                data: {
+                    options: option.options
+                }, updateHandler:
+                    handleUpdatedBehaviour
+            }" />
         </div>
-        <div :id="output.id" class="controll-point out"></div>
     </div>
 
     <!-- Input fields -->
-    <div v-for="input in nodeData.inputs" class="node-field left-field">
-        <div :id="input.id" class="controll-point in"></div>
+    <div v-for="input in node.inputs" class="node-field left-field">
+        <div :id="input.id" class="interface in"></div>
         <div class="field ">
-            <NumberInput v-if="variableValues.variableType === 'number'" v-model="variableValues.value" />
-            <StringInput v-if="variableValues.variableType === 'string'" v-model="variableValues.value" />
-            <DropDown :label="'value'" :options="[true, false]" v-if="variableValues.variableType === 'boolean'"
-                v-model="variableValues.value" />
+            <FieldWraper :field="{
+                fieldName: input.component,
+                data: { interface: input, options: input.options },
+                updateHandler: handleUpdatedInputValue
+            }" />
         </div>
     </div>
+    <button v-if="variableType === 'array'" class="primary-btn-c" @click="handleAddInterface">add
+        interface</button>
 </template>
 
 <script setup>
-import { nodeEditor } from '../../stores/nodeEditor';
-import DropDown from '../Fields/DropDown.vue';
-import NumberInput from '../Fields/NumberInput.vue';
-import StringInput from '../Fields/StringInput.vue';
-import { ref, watchEffect, reactive } from 'vue';
+import FieldWraper from '../Fields/FieldWraper.vue';
+
 
 const props = defineProps({
-    nodeData: Object
+    node: Object
 })
 
 const variableValues = reactive({
-    variableName: props.nodeData.name,
-    variableType: props.nodeData.variableType,
+    variableName: props.node.name,
+    variableType: props.node.variableType,
     variableBehaviour: 'const',
-    value: 3.2,
+    data: {
+        id: null,
+        value: null
+    }
 })
+
+const variableType = computed(() => props.node.outputs[0].type)
 
 const variableNameContent = ref(null)
 const allowNameEdit = ref(false)
-
-const values = [
-    "number",
-    "string",
-    "boolean",
-    "array",
-    "object",
-    "null",
-    "undefined",
-]
 
 const handleEdit = () => {
     allowNameEdit.value = !allowNameEdit.value
@@ -83,28 +95,46 @@ const handleBlur = (event) => {
     allowNameEdit.value = false
 }
 
+const handleUpdatedInputValue = ({ interfaceId, value }) => {
+    console.log(value)
+    props.node.setInterfaceInputValue(interfaceId, value)
+}
+
+const handleUpdatedOutputType = ({ value }) => {
+    console.log(value)
+    props.node.setCurrentState(value)
+}
+
+const handleUpdatedBehaviour = (value) => {
+    console.log(value)
+    props.node.variableBehaviour = value
+}
+
+const handleAddInterface = () => {
+    props.node.addInputInterface("number", 3.2, "NumberInput", {
+        label: "value",
+        defaultValue: 3.4,
+    })
+}
+
 watchEffect(() => {
     // Update node properties
-    props.nodeData.name = variableValues.variableName
-    props.nodeData.variableType = variableValues.variableType
-    props.nodeData.nodeValue.variableValue = variableValues.value
-    props.nodeData.variableBehaviour = variableValues.variableBehaviour
+    props.node.name = variableValues.variableName
+})
 
+watch(props.node.getOutputInterface(), (newVal) => {
     // De-link all nodes if variable-type doesn't match anymore
-    const connectedLinks = nodeEditor.findLinksConnectedToNode(props.nodeData)
-
+    const connectedLinks = nodeEditor.findLinksConnectedToNode(props.node)
     connectedLinks.forEach((link) => {
         if (link.sourceNode.nodeType === "variable" && link.targetNode.nodeType === "variable") {
-            if (link.sourceNode.variableType !== link.targetNode.variableType) {
-
-                link.targetNode.nodeValue.currentVariableReference = link.targetNode.name
-                const path = nodeEditor.removeConnectedTargetControllPoint(link)
+            if (link.sourceNode.getOutputInterface().type !== link.targetNode.getOutputInterface().type) {
+                link.targetNode.nodeReference.currentVariableReference = link.targetNode.name
+                const path = nodeEditor.removeConnectedTargetLink(link)
                 path.remove()
             }
         }
-
     })
-})
+});
 
 </script>
 
@@ -145,7 +175,7 @@ span {
     position: relative;
     align-items: flex-start;
     text-transform: capitalize;
-    gap: 0.4rem;
+    gap: 0.6rem;
     width: 100%;
     grid-column: 2/3;
 }
@@ -167,7 +197,7 @@ span {
     flex-grow: 1;
 }
 
-.controll-point {
+.interface {
     min-width: .6rem;
     aspect-ratio: 1/4;
     transform: translateY(-5%);
@@ -175,10 +205,13 @@ span {
 
 .in {
     background-color: var(--input-color);
-
 }
 
 .out {
     background-color: var(--output-color);
+}
+
+.primary-btn-c {
+    grid-column: 2/3;
 }
 </style>

@@ -8,3 +8,13 @@ export const TypesEnum = {
   NULL: "null",
   UNDEFINED: "undefined",
 };
+
+export const variableTypes = [
+  "number",
+  "string",
+  "boolean",
+  "array",
+  "object",
+  "null",
+  "undefined",
+];

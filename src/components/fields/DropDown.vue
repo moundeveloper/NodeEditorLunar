@@ -1,29 +1,33 @@
 <template>
     <div class="dropdown-wraper" ref="dropdownMenu">
         <div class="dropdown-header" @click="handleDropDown">
-            {{ label }}
+            {{ data.options.label }}
             <span> {{ selected }}</span>
             <img src="../../assets/icons/down-arrow-icon.svg" alt="">
         </div>
         <div v-show="currentState === states.OPENED" class="dropdown-body">
             <ul>
-                <li v-for="(value, i) in options" :key="i" @click="handleDropDownSelection(value)">{{ value }} </li>
+                <li v-for="(value, i) in data.options.values" :key="i" @click="handleDropDownSelection(value)">{{ value }}
+                </li>
             </ul>
         </div>
     </div>
 </template>
 
 <script setup>
-
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { InterfaceC } from '../../classes/Interface';
 
 
 const props = defineProps({
-    label: String,
-    options: Array
+    data: {
+        interface: InterfaceC,
+        options: {
+            label: String,
+            values: Array
+        }
+    },
+    updateHandler: Function
 })
-
-const emits = defineEmits();
 
 const states = {
     CLOSED: "closed", OPENED: "opened"
@@ -31,9 +35,7 @@ const states = {
 
 const currentState = ref(states.CLOSED)
 const dropdownMenu = ref(null)
-const selected = ref(props.options[0])
-
-emits('update:modelValue', selected.value);
+const selected = ref(props.data.options.values[0])
 
 const handleDropDown = (event) => {
     if (event.target !== dropdownMenu)
@@ -49,7 +51,12 @@ const handleDropDown = (event) => {
 const handleDropDownSelection = (value) => {
     selected.value = value
     currentState.value = states.CLOSED
-    emits('update:modelValue', selected.value);
+
+    if (props.data.interface.id) {
+        props.updateHandler({ interfaceId: props.data.interface.id, value: selected.value })
+        return
+    }
+    props.updateHandler(selected.value)
 }
 
 const handleClickOutside = (event) => {

@@ -56,21 +56,7 @@ const handleRun = () => {
     gap: 1rem;
 }
 
-.primary-btn-c {
-    background-color: var(--input-color);
-    padding: 0.5rem 1rem;
-    font-weight: 600;
-    color: var(--primary-color);
-    border: none;
-    text-transform: capitalize;
-    cursor: pointer;
-    border-radius: 0.1rem;
-    width: 100%;
-}
 
-.primary-btn-c:active {
-    background-color: rgb(4, 184, 184)
-}
 
 .display,
 .code-result {

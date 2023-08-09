@@ -1,0 +1,1 @@
+call node ./src/classes/tests.js 

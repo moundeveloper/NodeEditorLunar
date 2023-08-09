@@ -1,6 +1,6 @@
 <template>
     <div class="string-input-wrapper">
-        <textarea name="" id="" rows="6" value="" @input="updateCurrentValue" placeholder="Type something here..."
+        <textarea rows="6" value="" @input="updateCurrentValue" placeholder="Type something here..."
             @focus="nodeEditor.preventZooming = true" @blur="nodeEditor.preventZooming = false">
         </textarea>
     </div>
@@ -9,14 +9,22 @@
 <script setup>
 import { ref } from 'vue';
 import { nodeEditor } from "../../stores/nodeEditor.js"
+import { InterfaceC } from '../../classes/Interface';
 
 const currentValue = ref('');
 
-const emits = defineEmits();
+const props = defineProps({
+    data: {
+        interface: InterfaceC,
+        options: Object
+    },
+    updateHandler: Function
+})
+
 
 const updateCurrentValue = (event) => {
     currentValue.value = event.target.value;
-    emits('update:modelValue', currentValue.value);
+    props.updateHandler({ interfaceId: props.data.interface.id, value: currentValue.value })
 };
 
 </script>

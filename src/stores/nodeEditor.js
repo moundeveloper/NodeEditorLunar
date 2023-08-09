@@ -1,5 +1,3 @@
-import { reactive } from "vue";
-
 export const nodeEditor = reactive({
   scale: 1,
   nodes: [],
@@ -27,18 +25,19 @@ export const nodeEditor = reactive({
     return connectedLinks;
   },
   checkSourceLink(cpId) {
-    return this.links.find((link) => link.sourceControllPoint.id === cpId);
+    return this.links.find((link) => link.sourceInterface.id === cpId);
   },
   checkTargetLink(cpId) {
-    return this.links.find((link) => link.targetControllPoint.id === cpId);
+    return this.links.find((link) => link.targetInterface.id === cpId);
   },
-  removeConnectedTargetControllPoint(removeLink) {
+  removeConnectedTargetLink(removeLink) {
     const path = document.getElementById(removeLink.id);
     this.links = this.links.filter((link) => {
       if (link.id !== removeLink.id) {
         return link;
       }
-      link.targetNode.nodeValue.currentVariableReference = link.targetNode.name;
+      link.targetNode.nodeReference.currentVariableReference =
+        link.targetNode.name;
     });
     console.log("Link deleted successfully!");
     return path;
@@ -49,7 +48,7 @@ export const nodeEditor = reactive({
   updatePanningPos(pos) {
     this.panningPos = pos;
   },
-  updateNodeControllPoint(nodeId, cpId, callback) {
+  updateNodeInterface(nodeId, cpId, callback) {
     const node = this.nodes.find((node) => node.id === nodeId);
 
     if (!node) {

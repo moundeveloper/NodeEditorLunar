@@ -7,7 +7,7 @@
 
     <!-- Input fields -->
     <div v-for="input in nodeData.inputs" class="node-field left-field">
-        <div :id="input.id" class="controll-point in"></div>
+        <div :id="input.id" class="interface in"></div>
         <div class="field ">
             <div class="print-in-wraper">
                 <span>value</span>
@@ -17,11 +17,6 @@
 </template>
 
 <script setup>
-import DropDown from '../Fields/DropDown.vue';
-import NumberInput from '../Fields/NumberInput.vue';
-import StringInput from '../Fields/StringInput.vue';
-import { ref, watchEffect, reactive } from 'vue';
-
 const props = defineProps({
     nodeData: Object
 })
@@ -99,7 +94,7 @@ span {
     flex-grow: 1;
 }
 
-.controll-point {
+.interface {
     min-width: .6rem;
     aspect-ratio: 1/4;
     transform: translateY(-5%);
