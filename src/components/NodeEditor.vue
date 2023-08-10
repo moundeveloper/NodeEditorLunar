@@ -60,20 +60,12 @@ const createLink = (sourceId, targetId, path) => {
         }
     }
 
-    let sourceInterface = null
-    let targetInterface = null
-    let sourceNode = null
-    let targetNode = null
-    nodeEditor.updateNodeInterface(sourceFamily.grandparent.id, sourceId, (controllPoint, node) => {
-        sourceNode = node
-        sourceInterface = controllPoint
-        controllPoint.to = targetId
-    })
-    nodeEditor.updateNodeInterface(targetFamily.grandparent.id, targetId, (controllPoint, node) => {
-        targetNode = node
-        targetInterface = controllPoint
-        controllPoint.to = sourceId
-    })
+
+    const sourceNode = nodeEditor.getNodeById(sourceFamily.grandparent.id)
+    const targetNode = nodeEditor.getNodeById(targetFamily.grandparent.id)
+    const sourceInterface = nodeEditor.findInterfaceById(sourceNode, sourceId)
+    const targetInterface = nodeEditor.findInterfaceById(targetNode, targetId)
+
     const startPos = getElementPositionOffset(sourceId)
     const endPos = getElementPositionOffset(targetId)
     const { d } = generateDpath(startPos, endPos)
@@ -264,19 +256,16 @@ onMounted(() => {
 
             const targetBoxId = targetElement?.id;
 
-
             const sourceFamily = findGrandparentElementById(startBoxId)
             const targetFamily = findGrandparentElementById(targetBoxId)
 
             const sourceNodeObject = nodeEditor.getNodeById(sourceFamily.grandparent.id)
             const targetNodeObject = nodeEditor.getNodeById(targetFamily.grandparent.id)
 
-            const sourceInterface = sourceNodeObject.outputs.find(input => input.id)
-            const targetInterface = targetNodeObject.inputs.find(output => output.id)
+            const sourceInterface = nodeEditor.findInterfaceById(sourceNodeObject, startBoxId)
+            const targetInterface = nodeEditor.findInterfaceById(targetNodeObject, targetBoxId)
 
             if (sourceNodeObject.nodeType === "variable" && targetNodeObject.nodeType === "variable") {
-                console.log(sourceInterface.type)
-                console.log(targetInterface.type)
                 if (sourceInterface.type !== targetInterface.type) {
                     clearSVGPath(path);
                     return

@@ -13,17 +13,6 @@ export const nodeEditor = reactive({
   getNodeById(id) {
     return this.nodes.find((node) => node.id === id);
   },
-  findLinksConnectedToNode(targetNode) {
-    const connectedLinks = [];
-
-    for (const link of this.links) {
-      if (link.sourceNode === targetNode || link.targetNode === targetNode) {
-        connectedLinks.push(link);
-      }
-    }
-
-    return connectedLinks;
-  },
   checkSourceLink(cpId) {
     return this.links.find((link) => link.sourceInterface.id === cpId);
   },
@@ -48,26 +37,54 @@ export const nodeEditor = reactive({
   updatePanningPos(pos) {
     this.panningPos = pos;
   },
-  updateNodeInterface(nodeId, cpId, callback) {
-    const node = this.nodes.find((node) => node.id === nodeId);
+  isInterfaceConnected(interfaceC) {
+    const link = this.links.find(
+      (link) =>
+        link.sourceInterface === interfaceC ||
+        link.targetInterface === interfaceC
+    );
+    if (link) return true;
+    return false;
+  },
+  findLinksConnectedToNode(targetNode) {
+    const connectedLinks = [];
 
-    if (!node) {
-      console.log("Node not found.");
-      return;
+    for (const link of this.links) {
+      if (link.sourceNode === targetNode || link.targetNode === targetNode) {
+        connectedLinks.push(link);
+      }
     }
-    let controllPoint = null;
-    if (getControllPointType(cpId) === "out") {
-      controllPoint = node.outputs.find((cp) => cp.id === cpId);
+
+    return connectedLinks;
+  },
+  findLinkConnectedByInterface(interfaceC) {
+    const link = this.links.find(
+      (link) =>
+        link.sourceInterface === interfaceC ||
+        link.targetInterface === interfaceC
+    );
+    return link;
+  },
+  findNodeByInterface(interfaceId) {
+    const node = this.nodes.find((node) => {
+      let resultNode = null;
+      resultNode = node.inputs.find((input) => input.id === interfaceId);
+      if (resultNode) return resultNode;
+
+      resultNode = node.outputs.find((output) => output.id === interfaceId);
+      if (resultNode) return resultNode;
+
+      resultNode = node.options.find((option) => option.id === interfaceId);
+      if (resultNode) return resultNode;
+    });
+    return node;
+  },
+  findInterfaceById(node, interfaceId) {
+    if (getControllPointType(interfaceId) === "out") {
+      return node.outputs.find((cp) => cp.id === interfaceId);
     } else {
-      controllPoint = node.inputs.find((cp) => cp.id === cpId);
+      return node.inputs.find((cp) => cp.id === interfaceId);
     }
-
-    if (!controllPoint) {
-      console.log("Controll-point not found.");
-      return;
-    }
-    // Call the callback with the controll-point
-    callback(controllPoint, node);
   },
 });
 

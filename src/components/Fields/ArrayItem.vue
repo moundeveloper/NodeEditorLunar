@@ -6,7 +6,7 @@
                 interface: subInterface,
                 options: subInterface.options
             }, updateHandler:
-                handleUpdatedValue
+                selectHandler(subInterface.component)
         }" :key="i" />
 
         <button class="delete-interface-btn" @click="deleteArrayInterface()">
@@ -17,6 +17,7 @@
 
 <script setup>
 import { InterfaceC } from '../../classes/Interface';
+import { nodeEditor } from '../../stores/nodeEditor';
 
 const props = defineProps({
     data: {
@@ -29,35 +30,52 @@ const props = defineProps({
     updateHandler: Function
 })
 
+console.log(props.data.interface)
+
+
 const currentState = reactive({
     interfaceType: "number",
     interfaceComponent: "NumberInput"
 })
 
-/* 
-const interfaceType = ref(props.data.interface.type) */
-
-const handleUpdatedValue = ({ value }) => {
-    props.interface.setInterfaceValue(value)
+const selectHandler = (component) => {
+    if (component === "DropDown") {
+        return handleUpdatedType
+    }
+    return handleUpdatedValue
 }
 
-/* const handleUpdatedOutputType = ({ value }) => {
-    console.log(value)
-    props.node.setCurrentState(value)
-} */
 
-/* const deleteArrayInterface = () => {
-    const node = nodeEditor.nodes.find(node => node.inputs.find(input => input.id === props.interface.id))
+const handleUpdatedValue = ({ value }) => {
+    console.log("log from value: " + value)
+    /* props.interface.setInterfaceValue(value) */
+}
+
+const handleUpdatedType = ({ value }) => {
+    console.log("log from type: " + value)
+    props.data.interface.setCurrentState(value)
+}
+
+const deleteArrayInterface = () => {
+    const node = nodeEditor.nodes.find(node => node.inputs.find(input => input.id === props.data.interface.id))
     const state = node.getStateByType("array")
-    state.inputs = state.inputs.filter(input => input.id !== props.interface.id)
+    state.inputs = state.inputs.filter(input => input.id !== props.data.interface.id)
     node.setCurrentState("array")
-    console.log(node.getStateByType("array"))
-} */
+}
 
-watchEffect(() => {
-    // Update node properties
-    /* props.interface.setInterfaceType(interfaceType.value) */
-})
+// Make the delink work for array items as well
+// Make the delink work for when an array item gets deleted
+// Make array item not add interfaces if it's already connected by another
+// variable and also make it for variable node as well
+
+watch(props.data.interface.getTypeInterface(), (newVal) => {
+    // De-link all nodes if variable-type doesn't match anymore
+    console.log(nodeEditor.isInterfaceConnected(props.data.interface))
+    const link = nodeEditor.findLinkConnectedByInterface(props.data.interface)
+    if (!link) return
+    const path = nodeEditor.removeConnectedTargetLink(link)
+    path.remove()
+});
 
 </script>
 

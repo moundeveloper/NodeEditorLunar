@@ -14,10 +14,7 @@
                 fieldName: output.component,
                 data: {
                     interface: output,
-                    options: {
-                        label: output.options.label,
-                        values: output.options.values,
-                    }
+                    options: output.options
                 }, updateHandler:
                     handleUpdatedOutputType
             }" />
@@ -42,20 +39,30 @@
     <div v-for="input in node.inputs" class="node-field left-field">
         <div :id="input.id" class="interface in"></div>
         <div class="field ">
-            <FieldWraper :field="{
+            <FieldWraper v-if="!nodeEditor.isInterfaceConnected(input)" :field="{
                 fieldName: input.component,
                 data: { interface: input, options: input.options },
                 updateHandler: handleUpdatedInputValue
             }" />
+
+            <FieldWraper v-else :field="{
+                fieldName: 'DefaultTemplate',
+                data: {
+                    options: {
+                        label: 'value'
+                    }
+                },
+                updateHandler: handleUpdatedInputValue
+            }" />
         </div>
     </div>
-    <button v-if="variableType === 'array'" class="primary-btn-c" @click="handleAddInterface">add
-        interface</button>
+    <button v-if="variableType === 'array'" class="primary-btn-c" @click="handleAddArrayItem">add
+        array-item</button>
 </template>
 
 <script setup>
 import FieldWraper from '../Fields/FieldWraper.vue';
-
+import { nodeEditor } from '../../stores/nodeEditor';
 
 const props = defineProps({
     node: Object
@@ -110,11 +117,8 @@ const handleUpdatedBehaviour = (value) => {
     props.node.variableBehaviour = value
 }
 
-const handleAddInterface = () => {
-    props.node.addInputInterface("number", 3.2, "NumberInput", {
-        label: "value",
-        defaultValue: 3.4,
-    })
+const handleAddArrayItem = () => {
+    props.node.addInputInterface(new ArrayItem(genId("in")))
 }
 
 watchEffect(() => {
@@ -127,7 +131,10 @@ watch(props.node.getOutputInterface(), (newVal) => {
     const connectedLinks = nodeEditor.findLinksConnectedToNode(props.node)
     connectedLinks.forEach((link) => {
         if (link.sourceNode.nodeType === "variable" && link.targetNode.nodeType === "variable") {
+            // FIX THIS SHIT PLEASEESS!!!!!
+            console.log(link.sourceInterface, link.targetInterface)
             if (link.sourceNode.getOutputInterface().type !== link.targetNode.getOutputInterface().type) {
+                console.log("why are you ehre??")
                 link.targetNode.nodeReference.currentVariableReference = link.targetNode.name
                 const path = nodeEditor.removeConnectedTargetLink(link)
                 path.remove()

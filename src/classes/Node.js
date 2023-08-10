@@ -1,5 +1,5 @@
 import { genId } from "../utils/utility.js";
-import { InterfaceC } from "./Interface.js";
+import { ArrayItem, InterfaceC } from "./Interface.js";
 import { TypesEnum, variableTypes } from "./Types.js";
 export class NodeC {
   nodeType;
@@ -18,46 +18,16 @@ export class NodeC {
     this.position = position;
   }
 
-  addInputInterface(
-    type = null,
-    value = null,
-    component = null,
-    options = null
-  ) {
-    const newInterface = new InterfaceC(
-      genId("in"),
-      type,
-      value,
-      component,
-      options
-    );
+  addInputInterface(newInterface) {
     this.inputs.push(newInterface);
   }
-  addOutputInterface(
-    type = null,
-    value = null,
-    component = null,
-    options = null
-  ) {
-    const newInterface = new InterfaceC(
-      genId("out"),
-      type,
-      value,
-      component,
-      options
-    );
+  addOutputInterface(newInterface) {
     this.outputs.push(newInterface);
   }
-  addOption(type = null, value = null, component = null, options = null) {
-    const newInterface = new InterfaceC(
-      genId(),
-      type,
-      value,
-      component,
-      options
-    );
+  addOptionInterface(newInterface) {
     this.options.push(newInterface);
   }
+
   setInterfaceInputValue(id, newValue) {
     const input = this.inputs.find((input) => input.id === id);
     if (input) {
@@ -80,7 +50,7 @@ export class NodeC {
   }
 }
 
-class VariableState {
+export class VariableState {
   constructor(type, inputs) {
     this.type = type;
     this.inputs = inputs;
@@ -93,14 +63,18 @@ export class NodeVariableC extends NodeC {
     this.nodeType = "variable";
     this.variableType = TypesEnum.Number;
     this.variableBehaviour = "const";
-    this.addOutputInterface("number", null, "DropDown", {
-      label: "type",
-      values: variableTypes,
-    });
-    this.addOption(null, null, "DropDown", {
-      label: "behaviour",
-      values: ["const", "let"],
-    });
+    this.addOutputInterface(
+      new InterfaceC(genId("out"), "number", null, "DropDown", {
+        label: "type",
+        values: variableTypes,
+      })
+    );
+    this.addOptionInterface(
+      new InterfaceC(genId(), null, null, "DropDown", {
+        label: "behaviour",
+        values: ["const", "let"],
+      })
+    );
     this.states = [
       new VariableState("number", [
         new InterfaceC(genId("in"), "number", 3.4, "NumberInput", {
@@ -121,19 +95,7 @@ export class NodeVariableC extends NodeC {
         new InterfaceC(genId("in"), "array", null, "DefaultTemplate", {
           label: "array",
         }),
-        new InterfaceC(genId("in"), "number", 3.4, "ArrayItem", {
-          label: "value",
-          subInterfaces: [
-            new InterfaceC(genId(), null, null, "DropDown", {
-              label: "type",
-              values: variableTypes,
-            }),
-            new InterfaceC(genId(), "number", 3.4, "NumberInput", {
-              label: "value",
-              defaultValue: 3.4,
-            }),
-          ],
-        }),
+        new ArrayItem(genId("in")),
       ]),
     ];
     this.setCurrentState("number");

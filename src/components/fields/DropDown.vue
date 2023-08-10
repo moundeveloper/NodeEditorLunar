@@ -52,7 +52,7 @@ const handleDropDownSelection = (value) => {
     selected.value = value
     currentState.value = states.CLOSED
 
-    if (props.data.interface.id) {
+    if (props.data.interface) {
         props.updateHandler({ interfaceId: props.data.interface.id, value: selected.value })
         return
     }
